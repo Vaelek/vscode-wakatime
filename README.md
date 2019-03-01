@@ -4,6 +4,8 @@ WakaTime for Azure Data Studio
 Metrics, insights, and time tracking automatically generated from your programming activity.
 
 
+#### To install, go to the [Releases](https://github.com/Vaelek/vscode-wakatime/releases/latest) tab and download the latest `vsix` file. Install via the File menu in ADS.
+
 This is a fork of the WakaTime VSCode plugin for use with `Azure Data Studio`. Tested (so far) only on Windows.
 I made this for myself, but from all the posts I saw in my quest to make the VSCode version work in ADS, I am not alone, so I make this publicly available to anyone that would like it.
 
@@ -18,7 +20,6 @@ In my opinion, the most common use of ADS is ad-hoc queries, not `projects`.. As
 If not set, the project will be reported as `Generic SQL`
 
 In the original project, the WakaTime cli is silently downloaded on first run, and checked against the latest version on every subsequent launch. Due to a combination of issues during development, and a general distaste for the security implications of remote scripts, the Wakatime cli is bundled in this extension, and the remote fetching has been disabled.
-
 
 Original project notes follow
 =============================
