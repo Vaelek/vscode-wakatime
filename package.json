@@ -1,44 +1,24 @@
 {
-    "name": "vscode-wakatime",
-    "displayName": "WakaTime",
-    "description": "Metrics, insights, and time tracking automatically generated from your programming activity.",
-    "version": "1.2.7",
-    "publisher": "WakaTime",
-    "author": {
-        "name": "WakaTime"
+    "name": "Wakatime-AzureDataStudio",
+    "displayName": "WakaTime - ADS",
+    "description": "Wakatime with support for unsaved files and dynamic projects",
+    "version": "0.0.31",
+    "publisher": "vaelek",
+    "repository": {
+      "type": "git",
+      "url": "https://github.com/Vaelek/vscode-wakatime.git"
+      },
+    "engines": {
+        "vscode": "^1.31.0",
+        "sqlops": "*"
     },
     "categories": [
         "Other"
     ],
-    "homepage": "https://wakatime.com/",
-    "bugs": {
-        "url": "https://github.com/wakatime/vscode-wakatime/issues"
-    },
-    "license": "BSD-3-Clause",
-    "icon": "images/wakatime-logo.png",
-    "galleryBanner": {
-        "color": "#AEC3D8",
-        "theme": "light"
-    },
     "activationEvents": [
         "*"
     ],
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/wakatime/vscode-wakatime.git"
-    },
-    "engines": {
-        "vscode": "^1.17.0",
-        "sqlops": "*"
-    },
-    "main": "./dist/extension",
-    "scripts": {
-        "setup": "mkdir -p ./dist/test",
-        "vscode:prepublish": "webpack --mode production",
-        "webpack": "webpack --mode development",
-        "webpack-dev": "webpack --mode development --watch",
-        "postinstall": "node ./node_modules/vscode/bin/install"
-    },
+    "main": "./out/extension",
     "contributes": {
         "commands": [
             {
@@ -60,18 +40,38 @@
             {
                 "command": "wakatime.dashboard",
                 "title": "WakaTime Dashboard"
+            },
+            {
+                "command": "wakatime.setprojectkey",
+                "title": "WakaTime Set Project"
             }
         ]
     },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "webpack --mode production && rmdir /S /Q .\\dist\\wakatime-master && xcopy /E /Q /R /H /y .\\wakatime-cli\\* .\\dist\\",
+        "webpack-dev": "webpack --mode development --watch",
+        "postinstall": "node ./node_modules/vscode/bin/install && node ./node_modules/sqlops/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+    },
+    "dependencies": {
+        "request": "^2.87.0",
+        "request-promise-native": "^1.0.7"
+    },
     "devDependencies": {
-        "@types/node": "^10.5.5",
+        "@types/adm-zip": "^0.4.32",
+        "@types/mocha": "^2.2.42",
+        "@types/node": "^7.0.43",
+        "@types/request": "^2.48.1",
+        "@types/rimraf": "^2.0.2",
         "adm-zip": "0.4.11",
         "original-fs": "^1.0.0",
-        "request": "2.87.0",
         "rimraf": "2.6.2",
+        "sqlops": "github:anthonydresser/sqlops-extension-sqlops",
         "ts-loader": "^4.4.2",
+        "tslint": "^5.8.0",
         "typescript": "^3.0.3",
-        "vscode": "^1.1.22",
+        "vscode": "^1.1.6",
         "webpack": "^4.19.1",
         "webpack-cli": "^3.1.0"
     }

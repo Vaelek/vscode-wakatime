@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
+import * as request from 'request'
 
 var logger: Logger;
 var options: Options;
@@ -17,6 +18,18 @@ export function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand('wakatime.apikey', function(args) {
       wakatime.promptForApiKey();
+    }),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand('wakatime.setprojectkey', function(args) {
+      wakatime.promptForProjectName();
+    }),
+  );
+
+  ctx.subscriptions.push(
+    vscode.commands.registerCommand('wakatime.setfilekey', function(args) {
+      wakatime.promptForFileName();
     }),
   );
 
@@ -59,7 +72,8 @@ export class WakaTime {
     'Visual Studio Code': 'vscode',
   };
   private agentName: string;
-  private extension = vscode.extensions.getExtension('WakaTime.vscode-wakatime').packageJSON;
+  // private extension = vscode!.extensions!.getExtension('WakaTime.vscode-wakatime')!.packageJSON;
+  private extension = vscode!.extensions!.getExtension('vaelek.Wakatime-AzureDataStudio')!.packageJSON;
   private statusBar: vscode.StatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left,
   );
@@ -73,21 +87,21 @@ export class WakaTime {
 
   public initialize(): void {
     logger.debug('Initializing WakaTime v' + this.extension.version);
-    this.agentName = this.appNames[vscode.env.appName] || 'vscode';
+    this.agentName = 'Azure Data Studio';
     this.statusBar.text = '$(clock) WakaTime Initializing...';
     this.statusBar.show();
 
     this.checkApiKey();
 
     this.dependencies = new Dependencies(this.extension, this.options);
-    this.dependencies.checkAndInstall(() => {
+    // this.dependencies.checkAndInstall(() => {
       this.statusBar.text = '$(clock)';
       this.statusBar.tooltip = 'WakaTime: Initialized';
       this.options.getSetting('settings', 'status_bar_icon', (err, val) => {
         if (val && val.trim() == 'false') this.statusBar.hide();
         else this.statusBar.show();
       });
-    });
+    // });
 
     this.setupEventListeners();
   }
@@ -103,10 +117,39 @@ export class WakaTime {
         validateInput: this.validateKey.bind(this),
       };
       vscode.window.showInputBox(promptOptions).then(val => {
-        if (this.validateKey(val) == null) this.options.setSetting('settings', 'api_key', val);
+        if (this.validateKey(val || '') == null) this.options.setSetting('settings', 'api_key', val || '');
       });
     });
   }
+
+  public promptForProjectName(): void {
+    this.options.getSetting('settings', 'project_name', (err, defaultVal) => {
+      let promptOptions = {
+        prompt: 'WakaTime Project',
+        placeHolder: 'Project name..',
+        value: defaultVal || 'Generic SQL',
+        ignoreFocusOut: true
+      };
+      vscode.window.showInputBox(promptOptions).then(val => {
+        if (val != null) this.options.setSetting('settings', 'project_name', val);
+      });
+    });
+  }
+
+  public promptForFileName(): void {
+    this.options.getSetting('settings', 'file_name', (err, defaultVal) => {
+      console.log(defaultVal);
+      let promptOptions = {
+        prompt: 'WakaTime Project',
+        placeHolder: 'General.sql',
+        value: defaultVal,
+        ignoreFocusOut: true
+      };
+      vscode.window.showInputBox(promptOptions).then(val => {
+        if (val != null) this.options.setSetting('settings', 'file_name', val);
+      });
+    });
+  }  
 
   public promptForProxy(): void {
     this.options.getSetting('settings', 'proxy', (err, defaultVal) => {
@@ -245,24 +288,32 @@ export class WakaTime {
   }
 
   private onEvent(isWrite: boolean): void {
+    isWrite = true;
     let editor = vscode.window.activeTextEditor;
     if (editor) {
       let doc = editor.document;
       if (doc) {
         let file: string = doc.fileName;
-        if (file) {
-          let time: number = Date.now();
-          if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
-            this.sendHeartbeat(file, isWrite);
-            this.lastFile = file;
-            this.lastHeartbeat = time;
+        // let file: string;
+        options.getSetting('settings', 'project_name', (err, val) => {
+          if (!err) {
+            let project:string = val;
+            // logger.debug('Filename is ' + file);
+            if (project) {
+              let time: number = Date.now();
+              if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
+                this.sendHeartbeat(project, isWrite);
+                this.lastFile = file;
+                this.lastHeartbeat = time;
+              }
+            }
           }
-        }
+        });        
       }
     }
   }
 
-  private sendHeartbeat(file: string, isWrite): void {
+  private sendHeartbeat(project: string, isWrite): void {
     this.hasApiKey(hasApiKey => {
       if (hasApiKey) {
         this.dependencies.getPythonLocation(pythonBinary => {
@@ -270,9 +321,10 @@ export class WakaTime {
             let core = this.dependencies.getCoreLocation();
             let user_agent =
               this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version;
+            let file = 'c:\\General.sql'
             let args = [core, '--file', quote(file), '--plugin', quote(user_agent)];
-            let project = this.getProjectName(file);
-            if (project) args.push('--alternate-project', quote(project));
+            // let project = this.getProjectName(file);
+            if (project) args.push('--project', quote(project));
             if (isWrite) args.push('--write');
             if (Dependencies.isWindows()) {
               args.push(
@@ -410,7 +462,7 @@ export class WakaTime {
   private formatArguments(python: string, args: string[]): string {
     let clone = args.slice(0);
     clone.unshift(this.wrapArg(python));
-    let newCmds = [];
+    let newCmds:string[] = [];
     let lastCmd = '';
     for (let i = 0; i < clone.length; i++) {
       if (lastCmd == '--key') newCmds.push(this.wrapArg(this.obfuscateKey(clone[i])));
@@ -451,7 +503,7 @@ class Dependencies {
     } else {
       this.isCoreLatest(isLatest => {
         if (!isLatest) {
-          this.installCore(callback);
+          // this.installCore(callback);
         } else {
           callback();
         }
@@ -501,7 +553,7 @@ class Dependencies {
   }
 
   private findPython(locations: string[], callback: (string) => void): void {
-    const binary: string = locations.shift();
+    const binary: string = locations.shift() || '';
     if (!binary) {
       callback(null);
       return;
@@ -536,19 +588,19 @@ class Dependencies {
             let currentVersion = stderr.toString().trim();
             logger.debug('Current wakatime-core version is ' + currentVersion);
 
-            logger.debug('Checking for updates to wakatime-core...');
-            this.getLatestCoreVersion(latestVersion => {
-              if (currentVersion === latestVersion) {
-                logger.debug('wakatime-core is up to date.');
-                if (callback) callback(true);
-              } else if (latestVersion) {
-                logger.debug('Found an updated wakatime-core v' + latestVersion);
-                if (callback) callback(false);
-              } else {
-                logger.debug('Unable to find latest wakatime-core version from GitHub.');
-                if (callback) callback(false);
-              }
-            });
+            // logger.debug('Checking for updates to wakatime-core...');
+            // this.getLatestCoreVersion(latestVersion => {
+            //   if (currentVersion === latestVersion) {
+            //     logger.debug('wakatime-core is up to date.');
+            //     if (callback) callback(true);
+            //   } else if (latestVersion) {
+            //     logger.debug('Found an updated wakatime-core v' + latestVersion);
+            //     if (callback) callback(false);
+            //   } else {
+            //     logger.debug('Unable to find latest wakatime-core version from GitHub.');
+            //     if (callback) callback(false);
+            //   }
+            // });
           } else {
             if (callback) callback(false);
           }
@@ -561,7 +613,7 @@ class Dependencies {
 
   private async getLatestCoreVersion(callback: (string) => void): Promise<void> {
     let url = 'https://raw.githubusercontent.com/wakatime/wakatime/master/wakatime/__about__.py';
-    const request = await import('request');
+    // const request = await import('request');
     this.options.getSetting('settings', 'proxy', function(err, proxy) {
       let options = { url: url };
       if (proxy && proxy.trim()) options['proxy'] = proxy.trim();
@@ -621,7 +673,7 @@ class Dependencies {
   }
 
   private async downloadFile(url: string, outputFile: string, callback: () => void): Promise<void> {
-    const request = await import('request');
+    // const request = await import('request');
     this.options.getSetting('settings', 'proxy', function(err, proxy) {
       let options = { url: url };
       if (proxy && proxy.trim()) options['proxy'] = proxy.trim();
@@ -710,8 +762,8 @@ class Dependencies {
 }
 
 class Options {
-  private configFile = path.join(this.getWakaHome(), '.wakatime.cfg');
-  private logFile = path.join(this.getWakaHome(), '.wakatime.log');
+  private configFile = path.join(this.getWakaHome(), '.ads.wakatime.cfg');
+  private logFile = path.join(this.getWakaHome(), '.ads.wakatime.log');
 
   private getWakaHome(): string {
     let home = process.env.WAKATIME_HOME;
@@ -756,7 +808,7 @@ class Options {
       // ignore errors because config file might not exist yet
       if (err) content = '';
 
-      let contents = [];
+      let contents:string[] = [];
       let currentSection = '';
 
       let found = false;
@@ -798,7 +850,7 @@ class Options {
 
       fs.writeFile(this.getConfigFile(), contents.join('\n'), function(err2) {
         if (err) {
-          if (callback) callback(new Error('could not write to ' + this.getConfigFile()));
+          if (callback) callback(new Error('could not write to configfile'));
         } else {
           if (callback) callback(null);
         }

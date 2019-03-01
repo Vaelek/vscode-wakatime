@@ -1,0 +1,1 @@
+SELECT 'Dummy' From DoNotDeleteMe

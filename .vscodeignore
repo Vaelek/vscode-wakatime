@@ -15,3 +15,4 @@ node_modules/typescript/**
 tags
 tags.lock
 tags.temp
+vsc-extension-quickstart.md

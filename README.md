@@ -1,8 +1,27 @@
-WakaTime for Visual Studio Code
+WakaTime for Azure Data Studio
 ===============================
 
 Metrics, insights, and time tracking automatically generated from your programming activity.
 
+
+This is a fork of the WakaTime VSCode plugin for use with `Azure Data Studio`. Tested (so far) only on Windows.
+I made this for myself, but from all the posts I saw in my quest to make the VSCode version work in ADS, I am not alone, so I make this publicly available to anyone that would like it.
+
+The VS Code extension does function in ADS, but not with unsaved files, which is a very common, if not majority way to use it.
+
+If you are editing a saved query, the filename will be reflected, assuming you have not disabled filenames. If you are editing an unsaved query, then the filename will be passed as `General.sql`
+
+In my opinion, the most common use of ADS is ad-hoc queries, not `projects`.. As such, a new command has been added
+
+![type project](./images/type-project.png)
+
+If not set, the project will be reported as `Generic SQL`
+
+In the original project, the WakaTime cli is silently downloaded on first run, and checked against the latest version on every subsequent launch. Due to a combination of issues during development, and a general distaste for the security implications of remote scripts, the Wakatime cli is bundled in this extension, and the remote fetching has been disabled.
+
+
+Original project notes follow
+=============================
 
 Installation
 ------------
@@ -38,7 +57,7 @@ Configuring
 
 Some settings are available from CMD+SHIFT+p, then typing `wakatime`.
 
-Settings are stored in the INI file at `$WAKATIME_HOME/.wakatime.cfg`.
+Settings are stored in the INI file at `$WAKATIME_HOME/.ads.wakatime.cfg`.
 
 More information can be found from [wakatime core](https://github.com/wakatime/wakatime#configuring).
 
@@ -56,7 +75,7 @@ Next, open your Developer Console to view logs and errors:
 
 `Help → Toggle Developer Tools`
 
-Errors outside the scope of vscode-wakatime go to `$WAKATIME_HOME/.wakatime.log` from [wakatime-cli][wakatime-cli-help].
+Errors outside the scope of vscode-wakatime go to `$WAKATIME_HOME/.ads.wakatime.log` from [wakatime-cli][wakatime-cli-help].
 
 The [How to Debug Plugins][how to debug] guide shows how to check when coding activity was last received from your editor using the [Plugins Status Page][plugins status page].
 
