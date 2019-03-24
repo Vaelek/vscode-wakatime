@@ -5,9 +5,9 @@
     "version": "0.0.31",
     "publisher": "vaelek",
     "repository": {
-      "type": "git",
-      "url": "https://github.com/Vaelek/vscode-wakatime.git"
-      },
+        "type": "git",
+        "url": "https://github.com/Vaelek/vscode-wakatime.git"
+    },
     "engines": {
         "vscode": "^1.31.0",
         "sqlops": "*"
