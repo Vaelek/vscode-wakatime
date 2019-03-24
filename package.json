@@ -2,14 +2,14 @@
     "name": "Wakatime-AzureDataStudio",
     "displayName": "WakaTime - ADS",
     "description": "Wakatime with support for unsaved files and dynamic projects",
-    "version": "0.0.4",
+    "version": "0.0.42",
     "publisher": "vaelek",
     "repository": {
         "type": "git",
         "url": "https://github.com/Vaelek/vscode-wakatime.git"
     },
     "engines": {
-        "vscode": "^1.31.0",
+        "vscode": "*",
         "sqlops": "*"
     },
     "categories": [
