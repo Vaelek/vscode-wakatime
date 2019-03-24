@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 import * as child_process from 'child_process';
-import * as request from 'request'
+import * as request from 'request';
 
 var logger: Logger;
 var options: Options;
@@ -61,7 +61,7 @@ export function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(wakatime);
 
   options.getSetting('settings', 'debug', function(error, debug) {
-    if (debug && debug.trim() === 'true') logger.setLevel('debug');
+    if (debug && debug.trim() === 'true') { logger.setLevel('debug'); }
     wakatime.initialize();
   });
 }
@@ -98,8 +98,8 @@ export class WakaTime {
       this.statusBar.text = '$(clock)';
       this.statusBar.tooltip = 'WakaTime: Initialized';
       this.options.getSetting('settings', 'status_bar_icon', (err, val) => {
-        if (val && val.trim() == 'false') this.statusBar.hide();
-        else this.statusBar.show();
+        if (val && val.trim() === 'false') { this.statusBar.hide(); }
+        else { this.statusBar.show(); }
       });
     // });
 
@@ -108,7 +108,7 @@ export class WakaTime {
 
   public promptForApiKey(): void {
     this.options.getSetting('settings', 'api_key', (err, defaultVal) => {
-      if (this.validateKey(defaultVal) != null) defaultVal = '';
+      if (this.validateKey(defaultVal) !== null) { defaultVal = ''; }
       let promptOptions = {
         prompt: 'WakaTime API Key',
         placeHolder: 'Enter your api key from wakatime.com/settings',
@@ -117,7 +117,7 @@ export class WakaTime {
         validateInput: this.validateKey.bind(this),
       };
       vscode.window.showInputBox(promptOptions).then(val => {
-        if (this.validateKey(val || '') == null) this.options.setSetting('settings', 'api_key', val || '');
+        if (this.validateKey(val || '') === null) { this.options.setSetting('settings', 'api_key', val || ''); }
       });
     });
   }
@@ -131,7 +131,7 @@ export class WakaTime {
         ignoreFocusOut: true
       };
       vscode.window.showInputBox(promptOptions).then(val => {
-        if (val != null) this.options.setSetting('settings', 'project_name', val);
+        if (val !== null) { this.options.setSetting('settings', 'project_name', val); }
       });
     });
   }
@@ -146,14 +146,14 @@ export class WakaTime {
         ignoreFocusOut: true
       };
       vscode.window.showInputBox(promptOptions).then(val => {
-        if (val != null) this.options.setSetting('settings', 'file_name', val);
+        if (val !== null) { this.options.setSetting('settings', 'file_name', val); }
       });
     });
   }  
 
   public promptForProxy(): void {
     this.options.getSetting('settings', 'proxy', (err, defaultVal) => {
-      if (!defaultVal) defaultVal = '';
+      if (!defaultVal) { defaultVal = ''; }
       let promptOptions = {
         prompt: 'WakaTime Proxy',
         placeHolder: 'Proxy format is https://user:pass@host:port',
@@ -162,14 +162,14 @@ export class WakaTime {
         validateInput: this.validateProxy.bind(this),
       };
       vscode.window.showInputBox(promptOptions).then(val => {
-        if (val || val === '') this.options.setSetting('settings', 'proxy', val);
+        if (val || val === '') { this.options.setSetting('settings', 'proxy', val); }
       });
     });
   }
 
   public promptForDebug(): void {
     this.options.getSetting('settings', 'debug', (err, defaultVal) => {
-      if (!defaultVal || defaultVal.trim() !== 'true') defaultVal = 'false';
+      if (!defaultVal || defaultVal.trim() !== 'true') { defaultVal = 'false'; }
       let items: string[] = ['true', 'false'];
       let promptOptions = {
         placeHolder: 'true or false (Currently ' + defaultVal + ')',
@@ -177,7 +177,7 @@ export class WakaTime {
         ignoreFocusOut: true,
       };
       vscode.window.showQuickPick(items, promptOptions).then(newVal => {
-        if (newVal == null) return;
+        if (newVal === null) { return; }
         this.options.setSetting('settings', 'debug', newVal);
         if (newVal === 'true') {
           logger.setLevel('debug');
@@ -191,7 +191,7 @@ export class WakaTime {
 
   public promptStatusBarIcon(): void {
     this.options.getSetting('settings', 'status_bar_icon', (err, defaultVal) => {
-      if (!defaultVal || defaultVal.trim() !== 'false') defaultVal = 'true';
+      if (!defaultVal || defaultVal.trim() !== 'false') { defaultVal = 'true'; }
       let items: string[] = ['true', 'false'];
       let promptOptions = {
         placeHolder: 'true or false (Currently ' + defaultVal + ')',
@@ -199,7 +199,7 @@ export class WakaTime {
         ignoreFocusOut: true,
       };
       vscode.window.showQuickPick(items, promptOptions).then(newVal => {
-        if (newVal == null) return;
+        if (newVal === null) { return; }
         this.options.setSetting('settings', 'status_bar_icon', newVal);
         if (newVal === 'true') {
           this.statusBar.show();
@@ -218,13 +218,13 @@ export class WakaTime {
     if (Dependencies.isWindows()) {
       open = 'cmd';
       args.unshift('/c', 'start', '""');
-    } else if (os.type() == 'Darwin') {
+    } else if (os.type() === 'Darwin') {
       open = 'open';
     }
     let process = child_process.execFile(open, args, (error, stdout, stderr) => {
-      if (error != null) {
-        if (stderr && stderr.toString() != '') logger.error(stderr.toString());
-        if (stdout && stdout.toString() != '') logger.error(stdout.toString());
+      if (error !== null) {
+        if (stderr && stderr.toString() !== '') { logger.error(stderr.toString()); }
+        if (stdout && stdout.toString() !== '') { logger.error(stdout.toString()); }
         logger.error(error.toString());
       }
     });
@@ -237,34 +237,34 @@ export class WakaTime {
 
   private validateKey(key: string): string {
     const err = 'Invalid api key... check https://wakatime.com/settings for your key.';
-    if (!key) return err;
+    if (!key) { return err; }
     const re = new RegExp(
       '^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$',
       'i',
     );
-    if (!re.test(key)) return err;
+    if (!re.test(key)) { return err; }
     return null;
   }
 
   private validateProxy(proxy: string): string {
     const err =
       'Invalid proxy. Valid formats are https://user:pass@host:port or socks5://user:pass@host:port or domain\\user:pass.';
-    if (!proxy) return err;
+    if (!proxy) { return err; }
     let re = new RegExp('^((https?|socks5)://)?([^:@]+(:([^:@])+)?@)?[\\w\\.-]+(:\\d+)?$', 'i');
-    if (proxy.indexOf('\\') > -1) re = new RegExp('^.*\\\\.+$', 'i');
-    if (!re.test(proxy)) return err;
+    if (proxy.indexOf('\\') > -1) { re = new RegExp('^.*\\\\.+$', 'i'); }
+    if (!re.test(proxy)) { return err; }
     return null;
   }
 
   private checkApiKey(): void {
     this.hasApiKey(hasApiKey => {
-      if (!hasApiKey) this.promptForApiKey();
+      if (!hasApiKey) { this.promptForApiKey(); }
     });
   }
 
   private hasApiKey(callback: (boolean) => void): void {
     this.options.getSetting('settings', 'api_key', (error, apiKey) => {
-      callback(this.validateKey(apiKey) == null);
+      callback(this.validateKey(apiKey) === null);
     });
   }
 
@@ -288,7 +288,6 @@ export class WakaTime {
   }
 
   private onEvent(isWrite: boolean): void {
-    isWrite = true;
     let editor = vscode.window.activeTextEditor;
     if (editor) {
       let doc = editor.document;
@@ -297,12 +296,16 @@ export class WakaTime {
         // let file: string;
         options.getSetting('settings', 'project_name', (err, val) => {
           if (!err) {
-            let project:string = val;
-            // logger.debug('Filename is ' + file);
+            let project:string = val || 'Generic SQL';
+
             if (project) {
               let time: number = Date.now();
-              if (isWrite || this.enoughTimePassed(time) || this.lastFile !== file) {
-                this.sendHeartbeat(project, isWrite);
+              let wasEnoughTimePassed = this.enoughTimePassed(time);
+              if (isWrite || wasEnoughTimePassed || this.lastFile !== file) {
+                if (!fs.existsSync(file)) {
+                  file = 'c:\\General.sql';
+                }
+                this.sendHeartbeat(project, isWrite, file);
                 this.lastFile = file;
                 this.lastHeartbeat = time;
               }
@@ -313,7 +316,7 @@ export class WakaTime {
     }
   }
 
-  private sendHeartbeat(project: string, isWrite): void {
+  private sendHeartbeat(project: string, isWrite: boolean, file: string): void {
     this.hasApiKey(hasApiKey => {
       if (hasApiKey) {
         this.dependencies.getPythonLocation(pythonBinary => {
@@ -321,11 +324,10 @@ export class WakaTime {
             let core = this.dependencies.getCoreLocation();
             let user_agent =
               this.agentName + '/' + vscode.version + ' vscode-wakatime/' + this.extension.version;
-            let file = 'c:\\General.sql'
             let args = [core, '--file', quote(file), '--plugin', quote(user_agent)];
             // let project = this.getProjectName(file);
-            if (project) args.push('--project', quote(project));
-            if (isWrite) args.push('--write');
+            if (project) { args.push('--project', quote(project)); }
+            if (isWrite) { args.push('--write'); }
             if (Dependencies.isWindows()) {
               args.push(
                 '--config',
@@ -335,28 +337,28 @@ export class WakaTime {
               );
             }
 
-            logger.debug('Sending heartbeat: ' + this.formatArguments(pythonBinary, args));
+            logger.debug('Sending heartbeat: ' + this.formatArguments(pythonBinary, args));            
 
             let process = child_process.execFile(pythonBinary, args, (error, stdout, stderr) => {
-              if (error != null) {
-                if (stderr && stderr.toString() != '') logger.error(stderr.toString());
-                if (stdout && stdout.toString() != '') logger.error(stdout.toString());
+              if (error !== null) {
+                if (stderr && stderr.toString() !== '') { logger.error(stderr.toString()); }
+                if (stdout && stdout.toString() !== '') { logger.error(stdout.toString()); }
                 logger.error(error.toString());
               }
             });
             process.on('close', (code, signal) => {
-              if (code == 0) {
+              if (code === 0) {
                 this.statusBar.text = '$(clock)';
                 let today = new Date();
                 this.statusBar.tooltip = 'WakaTime: Last heartbeat sent ' + this.formatDate(today);
-              } else if (code == 102) {
+              } else if (code === 102) {
                 this.statusBar.text = '$(clock)';
                 this.statusBar.tooltip =
                   'WakaTime: Working offline... coding activity will sync next time we are online.';
                 logger.warn(
                   'API Error (102); Check your ' + options.getLogFile() + ' file for more details.',
                 );
-              } else if (code == 103) {
+              } else if (code === 103) {
                 this.statusBar.text = '$(clock) WakaTime Error';
                 let error_msg =
                   'Config Parsing Error (103); Check your ' +
@@ -364,7 +366,7 @@ export class WakaTime {
                   ' file for more details.';
                 this.statusBar.tooltip = 'WakaTime: ' + error_msg;
                 logger.error(error_msg);
-              } else if (code == 104) {
+              } else if (code === 104) {
                 this.statusBar.text = '$(clock) WakaTime Error';
                 let error_msg = 'Invalid API Key (104); Make sure your API Key is correct!';
                 this.statusBar.tooltip = 'WakaTime: ' + error_msg;
@@ -410,7 +412,7 @@ export class WakaTime {
       ampm = 'PM';
       hour = hour - 12;
     }
-    if (hour == 0) {
+    if (hour = 0) {
       hour = 12;
     }
     let minute = date.getMinutes();
@@ -430,7 +432,7 @@ export class WakaTime {
   }
 
   private enoughTimePassed(time: number): boolean {
-    return this.lastHeartbeat + 120000 < time;
+    return time - this.lastHeartbeat > 12000;
   }
 
   private getProjectName(file: string): string {
@@ -448,14 +450,15 @@ export class WakaTime {
     let newKey = '';
     if (key) {
       newKey = key;
-      if (key.length > 4)
+      if (key.length > 4) {
         newKey = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX' + key.substring(key.length - 4);
+      }
     }
     return newKey;
   }
 
   private wrapArg(arg: string): string {
-    if (arg.indexOf(' ') > -1) return '"' + arg.replace(/"/g, '\\"') + '"';
+    if (arg.indexOf(' ') > -1) { return '"' + arg.replace(/"/g, '\\"') + '"'; }
     return arg;
   }
 
@@ -465,8 +468,8 @@ export class WakaTime {
     let newCmds:string[] = [];
     let lastCmd = '';
     for (let i = 0; i < clone.length; i++) {
-      if (lastCmd == '--key') newCmds.push(this.wrapArg(this.obfuscateKey(clone[i])));
-      else newCmds.push(this.wrapArg(clone[i]));
+      if (lastCmd === '--key') { newCmds.push(this.wrapArg(this.obfuscateKey(clone[i]))); }
+      else { newCmds.push(this.wrapArg(clone[i])); }
       lastCmd = clone[i];
     }
     return newCmds.join(' ');
@@ -512,7 +515,7 @@ class Dependencies {
   }
 
   public getPythonLocation(callback: (string) => void): void {
-    if (this.cachedPythonLocation) return callback(this.cachedPythonLocation);
+    if (this.cachedPythonLocation) { return callback(this.cachedPythonLocation); }
 
     let locations: string[] = [
       this.dependenciesFolder + path.sep + 'python' + path.sep + 'pythonw',
@@ -525,13 +528,13 @@ class Dependencies {
       '/usr/bin/python',
     ];
     for (var i = 39; i >= 27; i--) {
-      if (i >= 30 && i <= 32) continue;
+      if (i >= 30 && i <= 32) { continue; }
       locations.push('\\python' + i + '\\pythonw');
       locations.push('\\Python' + i + '\\pythonw');
     }
 
     this.findPython(locations, python => {
-      if (python) this.cachedPythonLocation = python;
+      if (python) { this.cachedPythonLocation = python; }
       callback(python);
     });
   }
@@ -584,7 +587,7 @@ class Dependencies {
       if (pythonBinary) {
         let args = [this.getCoreLocation(), '--version'];
         child_process.execFile(pythonBinary, args, (error, stdout, stderr) => {
-          if (!(error != null)) {
+          if (!(error !== null)) {
             let currentVersion = stderr.toString().trim();
             logger.debug('Current wakatime-core version is ' + currentVersion);
 
@@ -602,11 +605,11 @@ class Dependencies {
             //   }
             // });
           } else {
-            if (callback) callback(false);
+            if (callback) { callback(false); }
           }
         });
       } else {
-        if (callback) callback(false);
+        if (callback) { callback(false); }
       }
     });
   }
@@ -616,21 +619,21 @@ class Dependencies {
     // const request = await import('request');
     this.options.getSetting('settings', 'proxy', function(err, proxy) {
       let options = { url: url };
-      if (proxy && proxy.trim()) options['proxy'] = proxy.trim();
+      if (proxy && proxy.trim()) { options['proxy'] = proxy.trim(); }
       request.get(options, function(error, response, body) {
         let version = null;
-        if (!error && response.statusCode == 200) {
+        if (!error && response.statusCode === 200) {
           let lines = body.split('\n');
           for (var i = 0; i < lines.length; i++) {
             let re = /^__version_info__ = \('([0-9]+)', '([0-9]+)', '([0-9]+)'\)/g;
             let match = re.exec(lines[i]);
             if (match) {
               version = match[1] + '.' + match[2] + '.' + match[3];
-              if (callback) return callback(version);
+              if (callback) { return callback(version); }
             }
           }
         }
-        if (callback) return callback(version);
+        if (callback) { return callback(version); }
       });
     });
   }
@@ -658,7 +661,7 @@ class Dependencies {
       try {
         const rimraf = await import('rimraf');
         rimraf(this.dependenciesFolder + path.sep + 'wakatime-master', () => {
-          if (callback != null) {
+          if (callback !== null) {
             return callback();
           }
         });
@@ -666,7 +669,7 @@ class Dependencies {
         logger.warn(e);
       }
     } else {
-      if (callback != null) {
+      if (callback !== null) {
         return callback();
       }
     }
@@ -676,13 +679,13 @@ class Dependencies {
     // const request = await import('request');
     this.options.getSetting('settings', 'proxy', function(err, proxy) {
       let options = { url: url };
-      if (proxy && proxy.trim()) options['proxy'] = proxy.trim();
+      if (proxy && proxy.trim()) { options['proxy'] = proxy.trim(); }
       let r = request.get(options);
       let out = fs.createWriteStream(outputFile);
       r.pipe(out);
       return r.on('end', function() {
         return out.on('finish', function() {
-          if (callback != null) {
+          if (callback !== null) {
             return callback();
           }
         });
@@ -718,7 +721,7 @@ class Dependencies {
     if (Dependencies.isWindows()) {
       let ver = '3.5.1';
       let arch = 'win32';
-      if (os.arch().indexOf('x64') > -1) arch = 'amd64';
+      if (os.arch().indexOf('x64') > -1) { arch = 'amd64'; }
       let url =
         'https://www.python.org/ftp/python/' + ver + '/python-' + ver + '-embed-' + arch + '.zip';
 
@@ -741,20 +744,20 @@ class Dependencies {
 
   private isSupportedPythonVersion(binary: string, versionString: string): boolean {
     // Only support Python 2.7+ because 2.6 has SSL problems
-    if (binary.toLowerCase().includes('python26')) return false;
+    if (binary.toLowerCase().includes('python26')) { return false; }
 
     const anaconda = /continuum|anaconda/gi;
     const isAnaconda: boolean = !!anaconda.test(versionString);
     const re = /python\s+(\d+)\.(\d+)\.(\d+)\s/gi;
     const ver = re.exec(versionString);
-    if (!ver) return !isAnaconda;
+    if (!ver) { return !isAnaconda; }
 
     // Older Ananconda python distributions not supported
     if (isAnaconda) {
-      if (parseInt(ver[1]) >= 3 && parseInt(ver[2]) >= 5) return true;
+      if (parseInt(ver[1]) >= 3 && parseInt(ver[2]) >= 5) { return true; }
     } else {
       // Only support Python 2.7+ because 2.6 has SSL problems
-      if (parseInt(ver[1]) >= 2 || parseInt(ver[2]) >= 7) return true;
+      if (parseInt(ver[1]) >= 2 || parseInt(ver[2]) >= 7) { return true; }
     }
 
     return false;
@@ -777,7 +780,7 @@ class Options {
   public getSetting(section: string, key: string, callback: (string, any) => void): void {
     fs.readFile(this.getConfigFile(), 'utf-8', (err: NodeJS.ErrnoException, content: string) => {
       if (err) {
-        if (callback) callback(new Error('could not read ' + this.getConfigFile()), null);
+        if (callback) { callback(new Error('could not read ' + this.getConfigFile()), null); }
       } else {
         let currentSection = '';
         let lines = content.split('\n');
@@ -792,13 +795,13 @@ class Options {
             let parts = line.split('=');
             let currentKey = parts[0].trim();
             if (currentKey === key && parts.length > 1) {
-              if (callback) callback(null, parts[1].trim());
+              if (callback) { callback(null, parts[1].trim()); }
               return;
             }
           }
         }
 
-        if (callback) callback(null, null);
+        if (callback) { callback(null, null); }
       }
     });
   }
@@ -806,7 +809,7 @@ class Options {
   public setSetting(section: string, key: string, val: string, callback?: (Error) => void): void {
     fs.readFile(this.getConfigFile(), 'utf-8', (err: NodeJS.ErrnoException, content: string) => {
       // ignore errors because config file might not exist yet
-      if (err) content = '';
+      if (err) { content = ''; }
 
       let contents:string[] = [];
       let currentSection = '';
@@ -850,9 +853,9 @@ class Options {
 
       fs.writeFile(this.getConfigFile(), contents.join('\n'), function(err2) {
         if (err) {
-          if (callback) callback(new Error('could not write to configfile'));
+          if (callback) { callback(new Error('could not write to configfile')); }
         } else {
-          if (callback) callback(null);
+          if (callback) { callback(null); }
         }
       });
     });
@@ -901,17 +904,17 @@ class Logger {
   }
 
   public log(level: string, msg: string): void {
-    if (!(level in this.levels)) throw new TypeError('Invalid level: ' + level);
+    if (!(level in this.levels)) { throw new TypeError('Invalid level: ' + level); }
 
     const current: number = this.levels[level];
     const cutoff: number = this.levels[this.level];
 
     if (current >= cutoff) {
       msg = '[WakaTime] [' + level.toUpperCase() + '] ' + msg;
-      if (level == 'debug') console.log(msg);
-      if (level == 'info') console.info(msg);
-      if (level == 'warn') console.warn(msg);
-      if (level == 'error') console.error(msg);
+      if (level === 'debug') { console.log(msg); }
+      if (level === 'info') { console.info(msg); }
+      if (level === 'warn') { console.warn(msg); }
+      if (level === 'error') { console.error(msg); }
     }
   }
 
@@ -933,6 +936,6 @@ class Logger {
 }
 
 function quote(str) {
-  if (str.includes(' ')) return '"' + str.replace('"', '\\"') + '"';
+  if (str.includes(' ')) { return '"' + str.replace('"', '\\"') + '"'; }
   return str;
 }
