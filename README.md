@@ -1,3 +1,6 @@
+DOES NOT CURRENTLY FUNCTION
+As it is this will flood the server with activities every time you do something. I don't have the time to fix it right now.
+
 WakaTime for Azure Data Studio
 ===============================
 
